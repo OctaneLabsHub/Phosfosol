@@ -11,9 +11,9 @@
 # 
 #
 #pendencias:
-# - tempo de execuÁ„o
-# - optimizaÁ„o dos algoritmos
-# - colocar o size para os profiles q est„o faltando
+# - tempo de execu√ß√£o
+# - optimiza√ß√£o dos algoritmos
+# - colocar o size para os profiles q est√£o faltando
 # - implementar -c para cada tipo de ataque
 
 
@@ -22,6 +22,7 @@ use Getopt::Std;
 my $ver="0.2";
 
 #16
+
 my %lhTrans = (En   => {
                         "usage" => "usage",
                         "file" => "file",
@@ -58,7 +59,7 @@ my %lhTrans = (En   => {
                         "32 bits PAE Operational System (self-ref pages)\n" => "Sistema Operacional de 32 bits com PAE (self-ref pages)\n", 
                         "32 bits Non-PAE Operational System (self-ref pages)\n" => "Sistema Operacional de 32 bits Non-PAE (self-ref pages)\n", 
                         "64 bits Operational System (self-ref pages)\n" => "Sistema Operacional de 64 bits (self-ref pages)\n",
-                        "No DTB/Profile information found\n" => "Nenhuma informaÁ„o relevante foi localizada\n",
+                        "No DTB/Profile information found\n" => "Nenhuma informa√ß√£o relevante foi localizada\n",
                         "Memory Anti-Anti-Forensics - Aborting the Abort Factor" => "Anti-Anti-Forense de Memoria - Aborting the Abort Factor",
                         "check memory dump" => "Verifica Abort Factor no dump de memoria",
                         "Could not find Idle Process\n" => "Processo Idle nao foi localizado\n",
@@ -155,7 +156,7 @@ my $lsDumpName = $args{f};
 #tamanho do dump
 my $lnDumpSize = -s $lsDumpName;
 
-#Abre o arquivo de memÛria, modo bin
+#Abre o arquivo de mem√≥ria, modo bin
 open(MEMO, "< :raw", $lsDumpName); 
 
 #printf "%#x\n", &enderecofisico(0x337000, 0x804d7000, 0, 1, MEMO, $lnDumpSize);
@@ -175,7 +176,7 @@ my $lsProgMsg = $lhTrans{$lsLang}->[7];
 
 print $lsProgMsg;
 
-#Percorre o arquivo por p·ginas grandes
+#Percorre o arquivo por p√°ginas grandes
 until ($lbStopReading) {
    
    #progresso
@@ -199,7 +200,7 @@ until ($lbStopReading) {
       my $lnKDBGSize = unpack("S", $3);
       $lnPos=$-[2];
       
-      #guarda apenas o primeiro de cada size encontrado. Guarda se È 32 ou 64bit e o offset do inicio da estrutura
+      #guarda apenas o primeiro de cada size encontrado. Guarda se √© 32 ou 64bit e o offset do inicio da estrutura
       $lhKDBG{$lnKDBGSize}=[($lsArchPat=~/\x00{8}/?32:64),($lnPos+$lnOffset-16)] unless (exists($lhKDBG{$lnKDBGSize}));
       #printf "$lnKDBGSize $lhKDBG{$lnKDBGSize}->[0] %#x\n", $lhKDBG{$lnKDBGSize}->[1];     
    }
@@ -207,7 +208,7 @@ until ($lbStopReading) {
    #procura pelo nome do processo Idle, buscando candidatos a DTB
    while ($lnPageBytes =~ /Idle\x00{10}/g) {
       
-      #suposta posiÁ„o do ImageFileName 
+      #suposta posi√ß√£o do ImageFileName 
       $lnPos=$-[0];
             
       my $lsProfile;
@@ -215,11 +216,11 @@ until ($lbStopReading) {
          #captura o suposto Dispatch_Header         
          my $lsDispHeader = substr($lnPageBytes, $lnPos+$lhProfiles{$lsProfile}->[0]+$lhProfiles{$lsProfile}->[1],8);
          
-         #compara com o esperado. Ajuda a filtrar os falso-positivos. N„o considera o Size por causa do Abort Factor
+         #compara com o esperado. Ajuda a filtrar os falso-positivos. N√£o considera o Size por causa do Abort Factor
          if ($lsDispHeader =~ /\x03\x00(.{1})\x00/) {
             $lnValDTB = quad(substr($lnPageBytes, $lnPos+$lhProfiles{$lsProfile}->[0],8));
             
-            #DTBs s„o alinhados em 0x20
+            #DTBs s√£o alinhados em 0x20
             if (($lnValDTB % 0x20) == 0) { 
                my $lnEndEProc = $lnPos+$lhProfiles{$lsProfile}->[0]+$lhProfiles{$lsProfile}->[1]+$lnOffset;
                $lhDTBCandidateIdle{$lnValDTB}{$lsProfile}=$lnEndEProc unless exists($lhDTBCandidateIdle{$lnValDTB});
@@ -229,7 +230,7 @@ until ($lbStopReading) {
       }
    }
    
-   #Busca p·ginas pelo auto-referenciamento
+   #Busca p√°ginas pelo auto-referenciamento
    $lnPos = 0;
    my $j;
    
@@ -237,7 +238,7 @@ until ($lbStopReading) {
       $lnPos = 32*$j;
       $lnValDTB = $lnOffset+$lnPos;
       
-      #sÛ avanÁa se for alinhado em 0x20
+      #s√≥ avan√ßa se for alinhado em 0x20
       next unless (($lnValDTB % 0x20) == 0);
       
       if (($lnValDTB % 0x1000) == 0) {
@@ -288,8 +289,8 @@ until ($lbStopReading) {
       
       next if ($w != (unpack("L",substr($buf,24,4)) & 0xFFFFF000));
    
-      #achamos uma p·gina que pode ser um directory table
-      #sÛ coloca como candidato se ele est· alinhado em 0x20
+      #achamos uma p√°gina que pode ser um directory table
+      #s√≥ coloca como candidato se ele est√° alinhado em 0x20
       $lhDTBCandidatePage{$lnValDTB}=0;
    
       
@@ -312,7 +313,7 @@ my $lsFoundProfile;
 my $lnFoundKDBG;
 my $lnArchKDBG;
 
-#Busca quem È igual
+#Busca quem √© igual
 foreach my $lnThisDTB (keys %lhDTBCandidateIdle) {
    if (exists($lhDTBCandidatePage{$lnThisDTB})) {
       $lbOk=1;
@@ -352,7 +353,7 @@ if ($lbOk) {
 else {
    print $lhTrans{$lsLang}->{"No DTB/Profile information found\n"};
    
-   #Faz uma verificacao mais detalhada porque n„o houve correlacao (Eprocess do Idle pode nao ter sido encontrado)
+   #Faz uma verificacao mais detalhada porque n√£o houve correlacao (Eprocess do Idle pode nao ter sido encontrado)
    
 }
 
